@@ -1,0 +1,6 @@
+parameter,shape,volume,sparse volume,sparsity level
+module.conv1.weight,"(6, 1, 5, 5)",150,150,0.0
+module.conv2.weight,"(16, 6, 5, 5)",2400,2400,0.0
+module.fc1.weight,"(120, 400)",48000,48000,0.0
+module.fc2.weight,"(84, 120)",10080,10080,0.0
+module.fc3.weight,"(10, 84)",840,840,0.0
