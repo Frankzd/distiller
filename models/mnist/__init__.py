@@ -14,9 +14,7 @@
 # limitations under the License.
 #
 
-"""This package contains ImageNet image classification models not found in torchvision"""
+"""This package contains MNIST image classification models for pytorch"""
 
-from .mobilenet import *
-from .preresnet_imagenet import *
-from .alexnet_batchnorm import *
-from .resnet_earlyexit import *
+from .simplenet_mnist import *
+from .lenet_mnist import *

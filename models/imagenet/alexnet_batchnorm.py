@@ -55,15 +55,15 @@ class AlexNetBN(nn.Module):
             nn.ReLU(inplace=True),
         )
         self.classifier = nn.Sequential(
-            nn.Linear(256 * 6 * 6, 4096, bias=False),       # fc0
+            nn.Linear_DC(256 * 6 * 6, 4096,16),       # fc0
             nn.BatchNorm1d(4096, eps=1e-4, momentum=0.9),   # bnfc0
             nn.ReLU(inplace=True),
-            nn.Linear(4096, 4096, bias=False),              # fc1
+            nn.Linear_DC(4096, 4096, 16),              # fc1
             nn.BatchNorm1d(4096, eps=1e-4, momentum=0.9),   # bnfc1
             nn.ReLU(inplace=True),
             nn.Linear(4096, num_classes),                   # fct
         )
-
+    '''
         for m in self.modules():
             if isinstance(m, (nn.Conv2d, nn.Linear)):
                 fan_in, k_size = (m.in_channels, m.kernel_size[0] * m.kernel_size[1]) if isinstance(m, nn.Conv2d) \
@@ -74,8 +74,7 @@ class AlexNetBN(nn.Module):
                     m.bias.data.fill_(0)
             elif isinstance(m, (nn.BatchNorm2d, nn.BatchNorm1d)):
                 m.weight.data.fill_(1)
-                m.bias.data.zero_()
-
+                m.bias.data.zero_()'''
     def forward(self, x):
         x = self.features(x)
         x = x.view(x.size(0), 256 * 6 * 6)

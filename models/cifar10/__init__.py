@@ -21,3 +21,8 @@ from .resnet_cifar import *
 from .preresnet_cifar import *
 from .vgg_cifar import *
 from .resnet_cifar_earlyexit import *
+from .densenet import *
+from .densenet_new import *
+from .cnn_tiny_cifar import *
+from .vgg_qzd_cifar import *
+from .vgg_bnn_cifar import *

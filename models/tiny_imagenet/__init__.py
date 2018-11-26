@@ -16,7 +16,4 @@
 
 """This package contains ImageNet image classification models not found in torchvision"""
 
-from .mobilenet import *
-from .preresnet_imagenet import *
-from .alexnet_batchnorm import *
-from .resnet_earlyexit import *
+from .alexnet_tiny_img import *
