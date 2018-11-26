@@ -83,7 +83,7 @@ class CompressionScheduler(object):
             masker = ParameterMasker(name)
             self.zeros_mask_dict[name] = masker
 
-    def add_policy(self, policy, epochs=None, starting_epoch=0, ending_epoch=1, frequency=1):
+    def add_policy(self, policy, epochs=None, starting_epoch=None, ending_epoch=None, frequency=None):
         """Add a new policy to the schedule.
 
         Args:
@@ -209,7 +209,8 @@ class CompressionScheduler(object):
 
         for name, mask in self.zeros_mask_dict.items():
             masker = self.zeros_mask_dict[name]
-            masker.mask = loaded_masks[name]
+            #annotate this line if you are not using pruning
+            #masker.mask = loaded_masks[name]
 
     @staticmethod
     def verify_policy_loss(policy_loss):

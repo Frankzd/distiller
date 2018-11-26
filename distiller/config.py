@@ -49,11 +49,10 @@ msglogger = logging.getLogger()
 app_cfg_logger = logging.getLogger("app_cfg")
 
 
-def dict_config(model, optimizer, sched_dict, scheduler=None):
+def dict_config(model, optimizer, sched_dict):
     app_cfg_logger.debug('Schedule contents:\n' + json.dumps(sched_dict, indent=2))
 
-    if scheduler is None:
-        scheduler = distiller.CompressionScheduler(model)
+    schedule = distiller.CompressionScheduler(model)
 
     pruners = __factory('pruners', model, sched_dict)
     regularizers = __factory('regularizers', model, sched_dict)
@@ -107,7 +106,7 @@ def dict_config(model, optimizer, sched_dict, scheduler=None):
             else:
                 raise ValueError("\nFATAL Parsing error while parsing the pruning schedule - unknown policy [%s]".format(policy_def))
 
-            add_policy_to_scheduler(policy, policy_def, scheduler)
+            add_policy_to_scheduler(policy, policy_def, schedule)
 
         # Any changes to the optmizer caused by a quantizer have occured by now, so safe to create LR schedulers
         lr_schedulers = __factory('lr_schedulers', model, sched_dict, optimizer=optimizer)
@@ -117,7 +116,7 @@ def dict_config(model, optimizer, sched_dict, scheduler=None):
                 instance_name)
             lr_scheduler = lr_schedulers[instance_name]
             policy = distiller.LRPolicy(lr_scheduler)
-            add_policy_to_scheduler(policy, policy_def, scheduler)
+            add_policy_to_scheduler(policy, policy_def, schedule)
 
     except AssertionError:
         # propagate the assertion information
@@ -126,25 +125,25 @@ def dict_config(model, optimizer, sched_dict, scheduler=None):
         print("\nFATAL Parsing error!\n%s" % json.dumps(policy_def, indent=1))
         print("Exception: %s %s" % (type(exception), exception))
         raise
-    return scheduler
+    return schedule
 
 
-def add_policy_to_scheduler(policy, policy_def, scheduler):
+def add_policy_to_scheduler(policy, policy_def, schedule):
     if 'epochs' in policy_def:
-        scheduler.add_policy(policy, epochs=policy_def['epochs'])
+        schedule.add_policy(policy, epochs=policy_def['epochs'])
     else:
-        scheduler.add_policy(policy, starting_epoch=policy_def['starting_epoch'],
+        schedule.add_policy(policy, starting_epoch=policy_def['starting_epoch'],
                             ending_epoch=policy_def['ending_epoch'],
                             frequency=policy_def['frequency'])
 
 
-def file_config(model, optimizer, filename, scheduler=None):
+def file_config(model, optimizer, filename):
     """Read the schedule from file"""
     with open(filename, 'r') as stream:
         msglogger.info('Reading compression schedule from: %s', filename)
         try:
             sched_dict = yaml_ordered_load(stream)
-            return dict_config(model, optimizer, sched_dict, scheduler)
+            return dict_config(model, optimizer, sched_dict)
         except yaml.YAMLError as exc:
             print("\nFATAL parsing error while parsing the schedule configuration file %s" % filename)
             raise

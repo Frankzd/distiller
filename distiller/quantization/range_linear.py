@@ -15,6 +15,7 @@
 #
 
 import torch.nn as nn
+import numpy as np
 
 from .quantizer import Quantizer
 from .q_utils import *
@@ -58,6 +59,52 @@ class RangeLinearQuantWrapper(nn.Module):
                                             inplace=False)
             inputs_q.append(torch.autograd.Variable(input_q))
 
+####################################print the input value of every layer################################# 
+        '''
+        if input_q.shape[1] == 1:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv1.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 6:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv2.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 400:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_fc1.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 120:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_fc2.csv',file_input,delimiter=',',fmt="%f")
+        else:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_fc3.csv',file_input,delimiter=',',fmt="%f")
+        '''
+        '''
+        if input_q.shape[1] == 3:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv1.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 128 and input_q.shape[2] == 32:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv2.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 128 and input_q.shape[2] == 16:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv3.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 256 and input_q.shape[2] == 16:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv4.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 256 and input_q.shape[2] == 8:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv5.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 512 and input_q.shape[2] == 8:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv6.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 2048:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_fc1.csv',file_input,delimiter=',',fmt="%f")
+        else:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_fc2.csv',file_input,delimiter=',',fmt="%f")
+        '''
+
+
         # Forward through wrapped module
         accum = self.wrapped_module.forward(*inputs_q)
         clamp(accum.data, self.accum_min_q_val, self.accum_max_q_val, inplace=True)
@@ -65,6 +112,52 @@ class RangeLinearQuantWrapper(nn.Module):
         # Re-quantize accumulator to quantized output range
         requant_scale, out_scale = self.post_quantized_forward(accum)
         out_q = linear_quantize_clamp(accum.data, requant_scale, self.acts_min_q_val, self.acts_max_q_val, inplace=True)
+
+####################################print the input value of every layer################################# 
+        '''
+        if input_q.shape[1] == 1:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv1.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 6:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv2.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 400:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_fc1.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 120:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_fc2.csv',file_input,delimiter=',',fmt="%f")
+        else:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_fc3.csv',file_input,delimiter=',',fmt="%f")
+        '''
+        '''
+        if input_q.shape[1] == 3:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv1.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 128 and input_q.shape[2] == 32:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv2.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 128 and input_q.shape[2] == 16:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv3.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 256 and input_q.shape[2] == 16:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv4.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 256 and input_q.shape[2] == 8:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv5.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 512 and input_q.shape[2] == 8:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_conv6.csv',file_input,delimiter=',',fmt="%f")
+        elif input_q.shape[1] == 2048:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_fc1.csv',file_input,delimiter=',',fmt="%f")
+        else:
+            file_input = input_q.cpu().detach().numpy().reshape(-1,1)
+            np.savetxt('file_input_fc2.csv',file_input,delimiter=',',fmt="%f")
+        '''
+
 
         # De-quantize back to FP32
         out_f = linear_dequantize(out_q, out_scale, inplace=True)
@@ -116,8 +209,42 @@ class RangeLinearQuantParamLayerWrapper(RangeLinearQuantWrapper):
         self.params_min_q_val, self.params_max_q_val = get_quantized_range(num_bits_params, signed=True)
 
         # Quantize weights - overwrite FP32 weights
-        self.w_scale = symmetric_linear_quantization_scale_factor(num_bits_params,
-                                                                  get_tensor_max_abs(wrapped_module.weight))
+        # Quantize weights - overwrite FP32 weights
+        
+        #cifar-10
+        if wrapped_module.weight.shape[1] == 3:
+            self.w_scale = 4
+        elif wrapped_module.weight.shape[1] == 128 and wrapped_module.weight.shape[0] == 128:
+            self.w_scale = 8
+        elif wrapped_module.weight.shape[1] == 128 and wrapped_module.weight.shape[0] == 256:
+            self.w_scale = 16
+        elif wrapped_module.weight.shape[1] == 256 and wrapped_module.weight.shape[0] == 256:
+            self.w_scale = 16
+        elif wrapped_module.weight.shape[1] == 256 and wrapped_module.weight.shape[0] == 512:
+            self.w_scale = 16
+        elif wrapped_module.weight.shape[1] == 512 and wrapped_module.weight.shape[0] == 512:
+            self.w_scale = 32
+        elif wrapped_module.weight.shape[1] == 2048:
+            self.w_scale = 32
+        else:
+            self.w_scale =16
+        
+        
+        #mnist
+        '''
+        if wrapped_module.weight.shape[1] == 1:
+            self.w_scale = 4
+        elif wrapped_module.weight.shape[1] == 6:
+            self.w_scale = 8
+        elif wrapped_module.weight.shape[1] == 400:
+            self.w_scale = 4
+        elif wrapped_module.weight.shape[1] == 120:
+            self.w_scale = 16
+        else:
+            self.w_scale =8        
+        '''
+        #self.w_scale = symmetric_linear_quantization_scale_factor(num_bits_params,
+        #                                                          get_tensor_max_abs(wrapped_module.weight))
         linear_quantize_clamp(wrapped_module.weight.data, self.w_scale, self.params_min_q_val, self.params_max_q_val,
                               inplace=True)
 
@@ -137,13 +264,49 @@ class RangeLinearQuantParamLayerWrapper(RangeLinearQuantWrapper):
         super(RangeLinearQuantParamLayerWrapper, self).forward(input)
 
     def pre_quantized_forward(self, input):
-        in_scale = symmetric_linear_quantization_scale_factor(self.num_bits_acts,
-                                                              self.acts_sat_val_func(input))
+        #print(input.shape)
+        
+        #cifar-10
+        if input.shape[1] == 3:
+            in_scale=64 #60
+        elif input.shape[1] == 128 and input.shape[2] == 32:
+            in_scale=32 #20
+        elif input.shape[1] == 128 and input.shape[2] == 16:
+            in_scale=16 #10
+        elif input.shape[1] == 256 and input.shape[2] == 16:
+            in_scale=16 #10
+        elif input.shape[1] == 256 and input.shape[2] == 8:
+            in_scale=8 #5
+        elif input.shape[1] == 512 and input.shape[2] == 8:
+            in_scale=4
+        elif input.shape[1] == 2048:
+            in_scale=4
+        else:
+            in_scale=16 #15
+        
+        '''
+        #mnist
+        if input.shape[1] == 1:
+            in_scale=64 #45
+        elif input.shape[1] == 6:
+            in_scale=16 #17
+        elif input.shape[1] == 400:
+            in_scale=4 #4
+        elif input.shape[1] == 120:
+            in_scale=4 #5
+        else:
+            in_scale=4 #3
+        '''
+        #in_scale = symmetric_linear_quantization_scale_factor(self.num_bits_acts,
+        #                                                      self.acts_sat_val_func(input))
         self.current_accum_scale = in_scale * self.w_scale
         if self.has_bias:
             # Re-quantize bias to match x * w scale: b_q' = (in_scale * w_scale / b_scale) * b_q
             self.wrapped_module.bias.data = linear_quantize_clamp(self.base_b_q, self.current_accum_scale / self.b_scale,
                                                                   self.accum_min_q_val, self.accum_max_q_val)
+        
+        #print("input.shape:",input.shape)                                                  
+        #print("in_scale:",in_scale)
         return [in_scale]
 
     def post_quantized_forward(self, accumulator):
@@ -186,6 +349,25 @@ class SymmetricLinearQuantizer(Quantizer):
         
         def replace_fn(module, name, qbits_map):
             clip = self.clip_acts and name not in no_clip_layers
+            '''
+            if name=='module.conv1':
+                return RangeLinearQuantParamLayerWrapper(module, 8, 4)
+            elif name=='module.conv2':
+                return RangeLinearQuantParamLayerWrapper(module, 8, 4)
+            elif name=='module.conv3':
+                return RangeLinearQuantParamLayerWrapper(module, 8, 4)
+            elif name=='module.conv4':
+                return RangeLinearQuantParamLayerWrapper(module, 8, 4)
+            elif name=='module.conv5':
+                return RangeLinearQuantParamLayerWrapper(module, 8, 4)
+            elif name=='module.conv6':
+                return RangeLinearQuantParamLayerWrapper(module, 8, 4)
+            elif name=='module.fc1':
+                return RangeLinearQuantParamLayerWrapper(module, 8, 4)
+            elif name=='module.fc2':
+                return RangeLinearQuantParamLayerWrapper(module, 8, 4)
+            else:
+            '''
             return RangeLinearQuantParamLayerWrapper(module, qbits_map[name].acts, qbits_map[name].wts,
                                                      num_bits_accum=self.bits_accum, clip_acts=clip)
 

@@ -20,6 +20,7 @@ import torch.nn as nn
 from .quantizer import Quantizer
 from .q_utils import *
 import logging
+import numpy as np
 msglogger = logging.getLogger()
 
 ###
@@ -81,8 +82,13 @@ class ClippedLinearQuantization(nn.Module):
         self.inplace = inplace
 
     def forward(self, input):
+        #print(input.shape)
         input = clamp(input, 0, self.clip_val, self.inplace)
         input = LinearQuantizeSTE.apply(input, self.scale_factor, self.dequantize, self.inplace)
+        #if input.shape[1]==6:
+        #   file_input = input.cpu().detach().numpy().reshape(-1,1)
+        #   np.savetxt('file_input_conv1.csv',file_input,delimiter=',',fmt="%f")
+        #print(input)
         return input
 
     def __repr__(self):
@@ -131,14 +137,24 @@ class WRPNQuantizer(Quantizer):
             return out
 
         def relu_replace_fn(module, name, qbits_map):
+            #print("relu_replace_fn")
             bits_acts = qbits_map[name].acts
             if bits_acts is None:
                 return module
             return ClippedLinearQuantization(bits_acts, 1, dequantize=True, inplace=module.inplace)
 
+        def replace_fn(module, name, qbits_map):
+            #print("relu_replace_fn")
+            bits_acts = qbits_map[name].acts
+            if bits_acts is None:
+                return module
+            return ClippedLinearQuantization(bits_acts, 1, dequantize=True)
+
         self.param_quantization_fn = wrpn_quantize_param
 
         self.replacement_factory[nn.ReLU] = relu_replace_fn
+        #self.replacement_factory[nn.Conv2d] = replace_fn
+        #self.replacement_factory[nn.Linear] = replace_fn
 
 
 def dorefa_quantize_param(param_fp, num_bits):

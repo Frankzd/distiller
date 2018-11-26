@@ -220,6 +220,10 @@ class QuantizationPolicy(ScheduledTrainingPolicy):
         self.quantizer.prepare_model()
         self.quantizer.quantize_params()
 
+    #def on_minibatch_begin(self, model, epoch, minibatch_id, minibatches_per_epoch, zeros_mask_dict, 
+#meta, optimizer):
+        #print("quantize the activation")
+
     def on_minibatch_end(self, model, epoch, minibatch_id, minibatches_per_epoch, zeros_mask_dict, optimizer):
         # After parameters update, quantize the parameters again
         # (Doing this here ensures the model parameters are quantized at training completion (and at validation time)

@@ -152,6 +152,7 @@ class Quantizer(object):
         """
         msglogger.info('Preparing model for quantization using {0}'.format(self.__class__.__name__))
         self._pre_process_container(self.model)
+        
 
         for module_name, module in self.model.named_modules():
             qbits = self.module_qbits_map[module_name]
@@ -171,7 +172,12 @@ class Quantizer(object):
                 param_full_name = '.'.join([module_name, param_name])
                 msglogger.info(
                     "Parameter '{0}' will be quantized to {1} bits".format(param_full_name, qbits.wts))
-
+        
+        print("prepare quantize")
+        params=self.params_to_quantize
+        for k in range(len(params)):
+            print(params[k].module_name)
+        
         # If an optimizer was passed, assume we need to update it
         if self.optimizer:
             optimizer_type = type(self.optimizer)
@@ -188,6 +194,7 @@ class Quantizer(object):
             if current_qbits.acts is None and current_qbits.wts is None:
                 continue
             try:
+                #print("replacement_factory")
                 new_module = self.replacement_factory[type(module)](module, full_name, self.module_qbits_map)
                 msglogger.debug('Module {0}: Replacing \n{1} with \n{2}'.format(full_name, module, new_module))
                 setattr(container, name, new_module)
@@ -223,6 +230,7 @@ class Quantizer(object):
         Quantize all parameters using the parameters using self.param_quantization_fn (using the defined number
         of bits for each parameter)
         """
+        #print("apply quantization")
         for ptq in self.params_to_quantize:
             q_param = self.param_quantization_fn(getattr(ptq.module, ptq.fp_attr_name), ptq.num_bits)
             if self.train_with_fp_copy:

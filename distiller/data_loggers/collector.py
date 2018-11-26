@@ -14,7 +14,6 @@
 # limitations under the License.
 #
 
-from functools import partial
 import xlsxwriter
 import os
 from collections import OrderedDict
@@ -77,8 +76,13 @@ class ActivationStatsCollector(object):
     def value(self):
         """Return a dictionary containing {layer_name: statistic}"""
         activation_stats = OrderedDict()
-        self.model.apply(partial(self._collect_activations_stats, activation_stats=activation_stats))
+        self.__value(self.model, activation_stats)
         return activation_stats
+
+    def __value(self, module, activation_stats):
+        for child_module in module._modules.values():
+            self.__value(child_module, activation_stats)
+        self._collect_activations_stats(module, activation_stats)
 
     def start(self):
         """Start collecting activation stats.
@@ -87,17 +91,7 @@ class ActivationStatsCollector(object):
         will be called from the forward traversal and get exposed to activation data.
         """
         assert len(self.fwd_hook_handles) == 0
-        self.model.apply(self.start_module)
-
-    def start_module(self, module):
-        """Iteratively register to the forward-pass callback of all eligable modules.
-
-        Eligable modules are currently filtered by their class type.
-        """
-        is_leaf_node = len(list(module.children())) == 0
-        if is_leaf_node and type(module) in self.classes:
-            self.fwd_hook_handles.append(module.register_forward_hook(self._activation_stats_cb))
-            self._start_counter(module)
+        self.__start(self.model)
 
     def stop(self):
         """Stop collecting activation stats.
@@ -110,8 +104,13 @@ class ActivationStatsCollector(object):
 
     def reset(self):
         """Reset the statsitics counters of this collector."""
-        self.model.apply(self._reset_counter)
+        self.__reset(self.model)
         return self
+
+    def __reset(self, module):
+        for child_module in module._modules.values():
+            self.__reset(child_module)
+        self._reset_counter(module)
 
     def __activation_stats_cb(self, module, input, output):
         """Handle new activations ('output' argument).
@@ -120,7 +119,22 @@ class ActivationStatsCollector(object):
         """
         raise NotImplementedError
 
-    def _reset_counter(self, module):
+    def __start(self, module, name=''):
+        """Iteratively register to the forward-pass callback of all eligable modules.
+
+        Eligable modules are currently filtered by their class type.
+        """
+        is_leaf_node = True
+        for name, sub_module in module._modules.items():
+            self.__start(sub_module, name)
+            is_leaf_node = False
+
+        if is_leaf_node:
+            if type(module) in self.classes:
+                self.fwd_hook_handles.append(module.register_forward_hook(self._activation_stats_cb))
+                self._start_counter(module)
+
+    def _reset_counter(self, mod):
         """Reset a specific statistic counter - this is subclass-specific code"""
         raise NotImplementedError
 
@@ -145,20 +159,7 @@ class SummaryActivationStatsCollector(ActivationStatsCollector):
 
         This is a callback from the forward() of 'module'.
         """
-        try:
-            getattr(module, self.stat_name).add(self.summary_fn(output.data))
-        except RuntimeError as e:
-            if "The expanded size of the tensor" in e.args[0]:
-                raise ValueError("ActivationStatsCollector: a module ({} - {}) was encountered twice during model.apply().\n"
-                                 "This is an indication that your model is using the same module instance, "
-                                 "in multiple nodes in the graph.  This usually occurs with ReLU modules: \n"
-                                 "For example in TorchVision's ResNet model, self.relu = nn.ReLU(inplace=True) is "
-                                 "instantiated once, but used multiple times.  This is not permissible when using "
-                                 "instances of ActivationStatsCollector.".
-                                 format(module.distiller_name, type(module)))
-            else:
-                msglogger.info("Exception in _activation_stats_cb: {} {}".format(module.distiller_name, type(module)))
-                raise
+        getattr(module, self.stat_name).add(self.summary_fn(output.data))
 
     def _start_counter(self, module):
         if not hasattr(module, self.stat_name):
@@ -171,9 +172,9 @@ class SummaryActivationStatsCollector(ActivationStatsCollector):
                                                                  module.__class__.__name__,
                                                                  str(id(module))))
 
-    def _reset_counter(self, module):
-        if hasattr(module, self.stat_name):
-            getattr(module, self.stat_name).reset()
+    def _reset_counter(self, mod):
+        if hasattr(mod, self.stat_name):
+            getattr(mod, self.stat_name).reset()
 
     def _collect_activations_stats(self, module, activation_stats, name=''):
         if hasattr(module, self.stat_name):
@@ -275,9 +276,9 @@ class RecordsActivationStatsCollector(ActivationStatsCollector):
         if not hasattr(module, "statsitics_records"):
             module.statsitics_records = self._create_records_dict()
 
-    def _reset_counter(self, module):
-        if hasattr(module, "statsitics_records"):
-            module.statsitics_records = self._create_records_dict()
+    def _reset_counter(self, mod):
+        if hasattr(mod, "statsitics_records"):
+            mod.statsitics_records = self._create_records_dict()
 
     def _collect_activations_stats(self, module, activation_stats, name=''):
         if hasattr(module, "statsitics_records"):
