@@ -26,3 +26,4 @@ from .densenet_new import *
 from .cnn_tiny_cifar import *
 from .vgg_qzd_cifar import *
 from .vgg_bnn_cifar import *
+from .shufflenet_cifar import *
